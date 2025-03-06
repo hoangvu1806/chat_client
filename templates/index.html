@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Chat Interface</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+            rel="stylesheet"
+        />
+        <script>
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            light: {
+                                primary: "hsl(142, 76%, 36%)",
+                                background: "hsl(0, 0%, 100%)",
+                                surface: "hsl(0, 0%, 98%)",
+                                border: "hsl(0, 0%, 90%)",
+                                text: "hsl(0, 0%, 20%)",
+                                "text-muted": "hsl(0, 0%, 45%)",
+                            },
+                            dark: {
+                                primary: "hsl(142, 76%, 36%)",
+                                background: "hsl(222.2, 84%, 4.9%)",
+                                surface: "hsl(222.2, 84%, 6.9%)",
+                                border: "hsl(217.2, 32.6%, 17.5%)",
+                                text: "hsl(210, 40%, 98%)",
+                                "text-muted": "hsl(215, 20%, 65%)",
+                            },
+                        },
+                        animation: {
+                            "fade-in": "fadeIn 0.1s ease-in-out",
+                            "slide-in": "slideIn 0.1s ease-in-out",
+                        },
+                        keyframes: {
+                            fadeIn: {
+                                "0%": { opacity: "0" },
+                                "100%": { opacity: "1" },
+                            },
+                            slideIn: {
+                                "0%": {
+                                    transform: "translateY(10px)",
+                                    opacity: "0",
+                                },
+                                "100%": {
+                                    transform: "translateY(0)",
+                                    opacity: "1",
+                                },
+                            },
+                        },
+                    },
+                },
+            };
+        </script>
+        <style>
+            @keyframes bounce {
+                0%,
+                100% {
+                    transform: translateY(0);
+                }
+
+                50% {
+                    transform: translateY(-5px);
+                }
+            }
+
+            .typing-dot {
+                animation: bounce 1s infinite;
+            }
+
+            .typing-dot:nth-child(2) {
+                animation-delay: 0.2s;
+            }
+
+            .typing-dot:nth-child(3) {
+                animation-delay: 0.4s;
+            }
+
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+
+            .custom-scrollbar {
+                scrollbar-width: thin;
+                scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+            }
+
+            .custom-scrollbar::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .custom-scrollbar::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+                background-color: rgba(156, 163, 175, 0.5);
+                border-radius: 20px;
+            }
+
+            .theme-transition {
+                transition: background-color 0.3s ease, color 0.3s ease,
+                    border-color 0.3s ease;
+            }
+
+            @keyframes messageIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .message-animation {
+                animation: messageIn 0.3s ease-out forwards;
+            }
+        </style>
+    </head>
+
+    <body class="theme-transition dark bg-dark-background text-dark-text">
+        <div class="min-h-screen flex">
+            <!-- Sidebar -->
+            <div
+                class="theme-transition w-[220px] bg-dark-surface border-r border-dark-border flex flex-col"
+            >
+                <div
+                    class="p-4 border-b border-dark-border flex items-center justify-between"
+                >
+                    <button
+                        id="newChatBtn"
+                        class="flex-1 flex items-center gap-2 px-4 py-2 bg-dark-primary text-dark-text rounded-lg hover:opacity-90 transition-opacity"
+                    >
+                        <i class="fas fa-plus text-sm"></i>
+                        <span>Cuộc trò chuyện mới</span>
+                    </button>
+                    <button
+                        id="themeToggle"
+                        class="ml-2 p-2 rounded-lg hover:bg-dark-border transition-colors"
+                    >
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+                <div
+                    class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1"
+                    id="chatHistory"
+                >
+                    <!-- Chat history will be populated here -->
+                </div>
+            </div>
+
+            <!-- Main Chat Area -->
+            <div
+                class="flex-1 flex flex-col bg-dark-background"
+                style="height: calc(100vh - 120px)"
+            >
+                <!-- Chat Header -->
+                <div
+                    class="theme-transition border-b border-dark-border p-4 flex items-center justify-between"
+                >
+                    <h1 class="text-xl font-semibold" id="chatTitle">
+                        Chat Interface
+                    </h1>
+                    <!-- Thêm dropdown chủ đề -->
+                    <div class="relative">
+                        <button
+                            id="topicDropdownBtn"
+                            class="flex items-center gap-2 px-3 py-1 bg-dark-surface hover:bg-dark-border rounded-lg transition-colors"
+                        >
+                            <i class="fas fa-list"></i>
+                            <span>Chọn chủ đề</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                        <div
+                            id="topicDropdown"
+                            class="hidden absolute right-0 mt-2 w-48 bg-dark-surface border border-dark-border rounded-lg shadow-lg z-10 animate-fade-in"
+                        >
+                            <button
+                                class="w-full text-left px-4 py-2 hover:bg-dark-border text-dark-text transition-colors"
+                                onclick="selectTopic('General')"
+                            >
+                                Tổng quát
+                            </button>
+                            <button
+                                class="w-full text-left px-4 py-2 hover:bg-dark-border text-dark-text transition-colors"
+                                onclick="selectTopic('Technology')"
+                            >
+                                Công nghệ
+                            </button>
+                            <button
+                                class="w-full text-left px-4 py-2 hover:bg-dark-border text-dark-text transition-colors"
+                                onclick="selectTopic('Science')"
+                            >
+                                Khoa học
+                            </button>
+                            <button
+                                class="w-full text-left px-4 py-2 hover:bg-dark-border text-dark-text transition-colors"
+                                onclick="selectTopic('Support')"
+                            >
+                                Hỗ trợ
+                            </button>
+                        </div>
+                    </div>
+                    <button
+                        id="themeToggle"
+                        class="p-2 rounded-lg hover:bg-dark-border transition-colors"
+                    >
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+
+                <!-- Messages Area -->
+                <div
+                    class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4"
+                    id="messagesArea"
+                >
+                    <!-- Messages will be populated here -->
+                </div>
+
+                <!-- Input Area -->
+                <div
+                    class="theme-transition border-t border-dark-border p-4 space-y-4"
+                    style="position: fixed; width: -moz-available; bottom: 0"
+                >
+                    <!-- Suggested Messages -->
+                    <div class="flex flex-wrap gap-2" id="suggestedMessages">
+                        <button
+                            class="px-3 py-1 text-sm bg-dark-surface hover:bg-dark-border rounded-full transition-colors"
+                        >
+                            Xin chào!
+                        </button>
+                        <button
+                            class="px-3 py-1 text-sm bg-dark-surface hover:bg-dark-border rounded-full transition-colors"
+                        >
+                            Bạn có thể giúp tôi không?
+                        </button>
+                        <button
+                            class="px-3 py-1 text-sm bg-dark-surface hover:bg-dark-border rounded-full transition-colors"
+                        >
+                            Làm thế nào để...
+                        </button>
+                        <button
+                            class="px-3 py-1 text-sm bg-dark-surface hover:bg-dark-border rounded-full transition-colors"
+                        >
+                            Cảm ơn bạn
+                        </button>
+                    </div>
+
+                    <!-- Message Input -->
+                    <div class="space-y-2">
+                        <div
+                            id="filePreview"
+                            class="hidden items-center gap-2 text-sm text-dark-text-muted bg-dark-surface p-2 rounded-lg animate-fade-in"
+                        >
+                            <span id="fileName"></span>
+                            <button
+                                id="clearFile"
+                                class="text-dark-text-muted hover:text-dark-text transition-colors"
+                            >
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button
+                                id="attachButton"
+                                class="p-2 bg-dark-surface hover:bg-dark-border rounded-lg transition-colors"
+                            >
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <input type="file" id="fileInput" class="hidden" />
+                            <textarea
+                                id="messageInput"
+                                class="theme-transition flex-1 bg-dark-surface text-dark-text rounded-lg p-2 resize-none focus:outline-none focus:ring-2 focus:ring-dark-primary border border-dark-border"
+                                placeholder="Type your message..."
+                                rows="1"
+                            ></textarea>
+                            <button
+                                id="sendButton"
+                                class="p-2 bg-dark-primary hover:opacity-90 rounded-lg transition-opacity disabled:opacity-50"
+                            >
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="/templates/script.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    </body>
+</html>
