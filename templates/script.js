@@ -32,6 +32,18 @@ const newChatBtn = document.getElementById("newChatBtn");
 const chatTitle = document.getElementById("chatTitle");
 const themeToggle = document.getElementById("themeToggle");
 const body = document.body;
+const topicDropdownBtn = document.getElementById("topicDropdownBtn");
+const topicDropdown = document.getElementById("topicDropdown");
+
+// Hàm escape HTML để bảo vệ nội dung
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
 
 // Theme Toggle
 function toggleTheme() {
@@ -84,42 +96,42 @@ function updateChatHistory() {
     chatHistory.innerHTML = sessions
         .map(
             (session) => `
-    <button 
-        class="theme-transition w-full flex items-center gap-2 px-3 py-2 rounded-lg ${
-            session.active
-                ? isDarkMode
-                    ? "bg-dark-border text-dark-text"
-                    : "bg-light-border text-light-text"
-                : isDarkMode
-                ? "text-dark-text-muted hover:bg-dark-surface"
-                : "text-light-text-muted hover:bg-light-surface"
-        }"
-        onclick="selectSession(${session.id})"
-    >
-        <i class="fas fa-message"></i>
-        <span class="truncate">${session.title}</span>
-    </button>
-`
+        <button 
+            class="theme-transition w-full flex items-center gap-2 px-3 py-2 rounded-lg ${
+                session.active
+                    ? isDarkMode
+                        ? "bg-dark-border text-dark-text"
+                        : "bg-light-border text-light-text"
+                    : isDarkMode
+                    ? "text-dark-text-muted hover:bg-dark-surface"
+                    : "text-light-text-muted hover:bg-light-surface"
+            }"
+            onclick="selectSession(${session.id})"
+        >
+            <i class="fas fa-message"></i>
+            <span class="truncate">${session.title}</span>
+        </button>
+    `
         )
         .join("");
 }
 
 function createTypingIndicator() {
     return `
-    <div class="flex justify-start animate-fade-in">
-        <div class="theme-transition ${
+    <div class="flex justify-start py-2 animate-fade-in">
+        <div class="theme-transition flex items-center gap-1.5 px-4 py-2 rounded-lg ${
             isDarkMode
                 ? "bg-dark-surface text-dark-text-muted"
                 : "bg-light-surface text-light-text-muted"
-        } rounded-lg px-4 py-2">
-            <div class="flex gap-1">
-                <div class="typing-dot w-2 h-2 rounded-full bg-current"></div>
-                <div class="typing-dot w-2 h-2 rounded-full bg-current"></div>
-                <div class="typing-dot w-2 h-2 rounded-full bg-current"></div>
+        }">
+            <div class="typing-container">
+                <span class="typing-dot dot1 w-2 h-2 rounded-full bg-current"></span>
+                <span class="typing-dot dot2 w-2 h-2 rounded-full bg-current"></span>
+                <span class="typing-dot dot3 w-2 h-2 rounded-full bg-current"></span>
             </div>
         </div>
     </div>
-`;
+    `;
 }
 
 function addMessage(content, isUser, file = null) {
@@ -135,10 +147,7 @@ function addMessage(content, isUser, file = null) {
 
     sessions = sessions.map((session) =>
         session.id === activeSession.id
-            ? {
-                  ...session,
-                  messages: [...session.messages, newMessage],
-              }
+            ? { ...session, messages: [...session.messages, newMessage] }
             : session
     );
 
@@ -153,32 +162,44 @@ function renderMessages() {
         activeSession.messages
             .map(
                 (message, index) => `
-    <div class="message-animation" style="animation-delay: ${index * 0.01}s">
-        <div class="flex ${message.isUser ? "justify-end" : "justify-start"}">
-            <div class="theme-transition max-w-[80%] rounded-lg px-4 py-2 ${
-                message.isUser
-                    ? "bg-dark-primary text-dark-text"
-                    : isDarkMode
-                    ? "bg-dark-surface text-dark-text"
-                    : "bg-light-surface text-light-text"
+        <div class="message-animation" style="animation-delay: ${
+            index * 0.01
+        }s">
+            <div class="flex ${
+                message.isUser ? "justify-end" : "justify-start"
             }">
-                ${
-                    message.file
-                        ? `
-                    <div class="flex items-center gap-2 mb-2 text-sm">
-                        <i class="fas fa-file"></i>
-                        <span>${message.file.name}</span>
+                <div class="theme-transition max-w-[80%] rounded-lg px-4 py-2 ${
+                    message.isUser
+                        ? "bg-dark-primary text-dark-text"
+                        : isDarkMode
+                        ? "bg-dark-surface text-dark-text"
+                        : "bg-light-surface text-light-text"
+                }">
+                    ${
+                        message.file
+                            ? `
+                        <div class="flex items-center gap-2 mb-2 text-sm">
+                            <i class="fas fa-file"></i>
+                            <span>${message.file.name}</span>
+                        </div>
+                    `
+                            : ""
+                    }
+                    <div class="markdown-content text-sm break-words">
+                        ${
+                            message.isUser
+                                ? escapeHtml(message.content)
+                                : marked.parse(message.content, {
+                                      gfm: true,
+                                      breaks: true,
+                                      sanitize: true,
+                                  })
+                        }
                     </div>
-                `
-                        : ""
-                }
-                <p class="text-sm whitespace-pre-wrap break-words">${
-                    message.content
-                }</p>
+                </div>
             </div>
         </div>
-    </div>
-`
+    `
             )
             .join("") + (isTyping ? createTypingIndicator() : "");
 
@@ -186,9 +207,6 @@ function renderMessages() {
 }
 
 // Topic Dropdown
-const topicDropdownBtn = document.getElementById("topicDropdownBtn");
-const topicDropdown = document.getElementById("topicDropdown");
-
 function toggleTopicDropdown() {
     topicDropdown.classList.toggle("hidden");
 }
@@ -212,60 +230,66 @@ function selectTopic(topic) {
 
     const welcomeMessages = {
         General: "Xin chào! Tôi có thể giúp gì cho bạn hôm nay?",
-        Technology: "Chào bạn! Bạn muốn thảo luận gì về công nghệ?",
-        Science: "Xin chào! Bạn quan tâm đến chủ đề khoa học nào?",
+        Sap_b1: "Chào bạn! Bạn muốn thảo luận gì về công nghệ?",
+        Sap_hana: "Xin chào! Bạn quan tâm đến chủ đề khoa học nào?",
         Support: "Chào bạn! Tôi ở đây để hỗ trợ bạn, bạn cần giúp gì?",
     };
 
     addMessage(welcomeMessages[topic], false);
     topicDropdown.classList.add("hidden");
+    updateChatHistory();
+    renderMessages();
 }
 
+// Handle Send Message
 async function handleSend() {
     const content = messageInput.value.trim();
     if (!content && !selectedFile) return;
 
-    const topic = topicDropdownBtn.textContent.trim(); // Lấy topic từ topicDropdownBtn
-    const prompt = content; // Tin nhắn từ người dùng
+    const topic = topicDropdownBtn.textContent.trim();
+    const prompt = content;
+    const activeSession = getActiveSession();
 
-    // Thêm tin nhắn của người dùng vào giao diện ngay lập tức
     addMessage(prompt, true, selectedFile);
-    // Reset input và file sau khi xử lý xong
+
+    isTyping = true;
+    renderMessages();
+
     messageInput.value = "";
+    const tempSelectedFile = selectedFile;
     selectedFile = null;
     filePreview.classList.add("hidden");
-    // Tạo FormData để gửi dữ liệu
+
     const formData = new FormData();
     formData.append("topic", topic);
     formData.append("prompt", prompt);
-    if (selectedFile) {
-        formData.append("file", selectedFile);
+    formData.append("section_name", activeSession.title); // Gửi section_name
+    console.log("Topic: " + topic);
+    console.log("Prompt: " + prompt);
+    console.log("Section Name: " + activeSession.title);
+    if (tempSelectedFile) {
+        formData.append("file", tempSelectedFile);
     }
-    console.log("formData", formData);
+
     try {
         const response = await fetch("/chat/send_message", {
             method: "POST",
             body: formData,
         });
 
-        // Kiểm tra nếu yêu cầu thất bại
         if (!response.ok) {
             throw new Error("Gửi tin nhắn thất bại");
         }
-        const data = await response.json();
-        const serverResponse = data.output; // Giả sử server trả về JSON với trường 'output'
 
-        // Thêm phản hồi từ server vào giao diện
+        const data = await response.json();
+        const serverResponse = data.output;
+
+        isTyping = false;
         addMessage(serverResponse, false);
     } catch (error) {
         console.error("Lỗi khi gửi tin nhắn:", error);
-        // Hiển thị thông báo lỗi cho người dùng
-        addMessage(error, false);
-    } finally {
-        // Reset input và file sau khi xử lý xong
-        messageInput.value = "";
-        selectedFile = null;
-        filePreview.classList.add("hidden");
+        isTyping = false;
+        addMessage("Đã xảy ra lỗi: " + error.message, false);
     }
 }
 
@@ -293,10 +317,7 @@ function createNewSession() {
     };
 
     sessions = sessions
-        .map((session) => ({
-            ...session,
-            active: false,
-        }))
+        .map((session) => ({ ...session, active: false }))
         .concat(newSession);
 
     updateChatHistory();
@@ -342,48 +363,53 @@ topicDropdownBtn.addEventListener("click", (e) => {
     toggleTopicDropdown();
 });
 
-suggestedMessages.addEventListener("click", (e) => {
-    if (e.target.tagName === "BUTTON") {
-        messageInput.value = e.target.textContent.trim();
-        handleSend();
-    }
-});
-
 // Initial render
 updateTheme();
 updateChatHistory();
 renderMessages();
 
-(function () {
-    function c() {
-        var b = a.contentDocument || a.contentWindow.document;
-        if (b) {
-            var d = b.createElement("script");
-            d.innerHTML =
-                "window.__CF$cv$params={r:'91b83d599deebca2',t:'MTc0MTE2MzMwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
-            b.getElementsByTagName("head")[0].appendChild(d);
-        }
+const editTitleBtn = document.getElementById("editTitleBtn");
+const editTitleModal = document.getElementById("editTitleModal");
+const newTitleInput = document.getElementById("newTitleInput");
+const saveTitleBtn = document.getElementById("saveTitleBtn");
+const cancelTitleBtn = document.getElementById("cancelTitleBtn");
+
+function showEditTitleModal() {
+    const activeSession = getActiveSession();
+    newTitleInput.value = activeSession.title;
+    editTitleModal.classList.remove("hidden");
+}
+
+function hideEditTitleModal() {
+    editTitleModal.classList.add("hidden");
+    newTitleInput.value = "";
+}
+
+function saveNewTitle() {
+    const newTitle = newTitleInput.value.trim();
+    if (!newTitle) {
+        alert("Tên không được để trống!");
+        return;
     }
-    if (document.body) {
-        var a = document.createElement("iframe");
-        a.height = 1;
-        a.width = 1;
-        a.style.position = "absolute";
-        a.style.top = 0;
-        a.style.left = 0;
-        a.style.border = "none";
-        a.style.visibility = "hidden";
-        document.body.appendChild(a);
-        if ("loading" !== document.readyState) c();
-        else if (window.addEventListener)
-            document.addEventListener("DOMContentLoaded", c);
-        else {
-            var e = document.onreadystatechange || function () {};
-            document.onreadystatechange = function (b) {
-                e(b);
-                "loading" !== document.readyState &&
-                    ((document.onreadystatechange = e), c());
-            };
-        }
+
+    const activeSession = getActiveSession();
+    sessions = sessions.map((session) =>
+        session.id === activeSession.id
+            ? { ...session, title: newTitle }
+            : session
+    );
+
+    updateChatHistory();
+    renderMessages();
+    hideEditTitleModal();
+}
+
+editTitleBtn.addEventListener("click", showEditTitleModal);
+saveTitleBtn.addEventListener("click", saveNewTitle);
+cancelTitleBtn.addEventListener("click", hideEditTitleModal);
+
+editTitleModal.addEventListener("click", (e) => {
+    if (e.target === editTitleModal) {
+        hideEditTitleModal();
     }
-})();
+});

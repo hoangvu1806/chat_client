@@ -27,24 +27,28 @@ app.add_middleware(
 # Gắn thư mục static để phục vụ tệp HTML
 # app.mount("/", StaticFiles(directory="templates", html=True), name="static")
 app.mount("/templates", StaticFiles(directory="templates"), name="js")
+app.mount("/images", StaticFiles(directory="images"), name="images")
 # Cấu hình Jinja2Templates
 templates = Jinja2Templates(directory="templates")
 
 @app.get("/")
 def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})\
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.post("/chat/send_message")
 async def send_message(
     topic: str = Form(...),
     prompt: str = Form(...),
+    section_name: str = Form(...),
     file: UploadFile = File(None)
 ):
     # Chuẩn bị dữ liệu gửi đến webhook
+    print(topic, prompt, section_name)
     data = {
         "topic": topic,
-        "prompt": prompt
+        "prompt": prompt,
+        "session_name": section_name
     }
     print(data)
     files = {}
@@ -54,11 +58,11 @@ async def send_message(
     try:
         # Gửi yêu cầu đến webhook
         response = requests.post(
-            "https://n8n.hoangvu.id.vn/webhook/chat",
+            "https://n8n.hoangvu.id.vn/webhook/sap_sp",
             data=data,
             files=files if files else None
         )
-
+        print(response.json())
         if response.status_code != 200:
             raise Exception(f"Webhook trả về mã lỗi {response.status_code}")
 

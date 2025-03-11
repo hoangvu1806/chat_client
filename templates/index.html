@@ -5,10 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Chat Interface</title>
         <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
         <link
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
             rel="stylesheet"
         />
+        <link rel="stylesheet" href="/templates/style.css" />
         <script>
             tailwind.config = {
                 darkMode: "class",
@@ -165,9 +167,51 @@
                 <div
                     class="theme-transition border-b border-dark-border p-4 flex items-center justify-between"
                 >
-                    <h1 class="text-xl font-semibold" id="chatTitle">
-                        Chat Interface
-                    </h1>
+                    <div class="flex items-center gap-2">
+                        <h1 id="chatTitle" class="text-xl font-semibold">
+                            Chat Interface
+                        </h1>
+                        <button
+                            id="editTitleBtn"
+                            class="text-sm text-gray-500 hover:text-gray-700"
+                        >
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+
+                    <!-- Modal để đổi tên -->
+                    <div
+                        id="editTitleModal"
+                        class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+                    >
+                        <div
+                            class="theme-transition p-4 rounded-lg max-w-sm w-full"
+                        >
+                            <h3 class="text-lg font-semibold mb-2">
+                                Đổi tên cuộc trò chuyện
+                            </h3>
+                            <input
+                                id="newTitleInput"
+                                type="text"
+                                class="theme-transition w-full px-3 py-2 rounded-lg mb-2"
+                                placeholder="Nhập tên mới"
+                            />
+                            <div class="flex justify-end gap-2">
+                                <button
+                                    id="saveTitleBtn"
+                                    class="theme-transition px-4 py-2 rounded-lg bg-dark-primary text-dark-text hover:bg-dark-primary-dark"
+                                >
+                                    Lưu
+                                </button>
+                                <button
+                                    id="cancelTitleBtn"
+                                    class="theme-transition px-4 py-2 rounded-lg bg-gray-500 text-white hover:bg-gray-600"
+                                >
+                                    Hủy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <!-- Thêm dropdown chủ đề -->
                     <div class="relative">
                         <button
@@ -190,15 +234,15 @@
                             </button>
                             <button
                                 class="w-full text-left px-4 py-2 hover:bg-dark-border text-dark-text transition-colors"
-                                onclick="selectTopic('Technology')"
+                                onclick="selectTopic('Sap_b1')"
                             >
-                                Công nghệ
+                                SAP B1
                             </button>
                             <button
                                 class="w-full text-left px-4 py-2 hover:bg-dark-border text-dark-text transition-colors"
-                                onclick="selectTopic('Science')"
+                                onclick="selectTopic('Sap_hana')"
                             >
-                                Khoa học
+                                SAP HANA
                             </button>
                             <button
                                 class="w-full text-left px-4 py-2 hover:bg-dark-border text-dark-text transition-colors"
@@ -227,15 +271,17 @@
                 <!-- Input Area -->
                 <div
                     class="theme-transition border-t border-dark-border p-4 space-y-4"
-                    style="position: fixed; width: -moz-available; bottom: 0"
+                    style="
+                        position: fixed;
+                        width: calc(100% - 220px);
+                        bottom: 0;
+                    "
                 >
                     <!-- Suggested Messages -->
                     <div class="flex flex-wrap gap-2" id="suggestedMessages">
                         <button
                             class="px-3 py-1 text-sm bg-dark-surface hover:bg-dark-border rounded-full transition-colors"
-                        >
-                            Xin chào!
-                        </button>
+                        ></button>
                         <button
                             class="px-3 py-1 text-sm bg-dark-surface hover:bg-dark-border rounded-full transition-colors"
                         >
