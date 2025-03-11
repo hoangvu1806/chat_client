@@ -122,7 +122,7 @@
             }
 
             .message-animation {
-                animation: messageIn 0.3s ease-out forwards;
+                animation: messageIn 0.1s ease-out forwards;
             }
         </style>
     </head>
@@ -138,20 +138,14 @@
                 >
                     <button
                         id="newChatBtn"
-                        class="flex-1 flex items-center gap-2 px-4 py-2 bg-dark-primary text-dark-text rounded-lg hover:opacity-90 transition-opacity"
+                        class="flex-1 flex items-center gap-2 px-4 py-4 bg-dark-primary text-dark-text rounded-lg hover:opacity-75 transition-opacity"
                     >
-                        <i class="fas fa-plus text-sm"></i>
-                        <span>Cuộc trò chuyện mới</span>
-                    </button>
-                    <button
-                        id="themeToggle"
-                        class="ml-2 p-2 rounded-lg hover:bg-dark-border transition-colors"
-                    >
-                        <i class="fas fa-moon"></i>
+                        <i class="fas fa-plus text-sm px-2"></i>
+                        <span style="font-weight: bold">Đoạn chat mới</span>
                     </button>
                 </div>
                 <div
-                    class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1"
+                    class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-1"
                     id="chatHistory"
                 >
                     <!-- Chat history will be populated here -->
@@ -165,7 +159,7 @@
             >
                 <!-- Chat Header -->
                 <div
-                    class="theme-transition border-b border-dark-border p-4 flex items-center justify-between"
+                    class="theme-transition border-b border-dark-border p-6 flex items-center justify-between"
                 >
                     <div class="flex items-center gap-2">
                         <h1 id="chatTitle" class="text-xl font-semibold">
@@ -188,7 +182,7 @@
                             class="theme-transition p-4 rounded-lg max-w-sm w-full"
                         >
                             <h3 class="text-lg font-semibold mb-2">
-                                Đổi tên cuộc trò chuyện
+                                Đổi tên đoạn chat
                             </h3>
                             <input
                                 id="newTitleInput"
@@ -199,7 +193,7 @@
                             <div class="flex justify-end gap-2">
                                 <button
                                     id="saveTitleBtn"
-                                    class="theme-transition px-4 py-2 rounded-lg bg-dark-primary text-dark-text hover:bg-dark-primary-dark"
+                                    class="theme-transition px-4 py-2 rounded-lg bg-light-primary text-light-text hover:bg-light-primary-light"
                                 >
                                     Lưu
                                 </button>
@@ -219,7 +213,7 @@
                             class="flex items-center gap-2 px-3 py-1 bg-dark-surface hover:bg-dark-border rounded-lg transition-colors"
                         >
                             <i class="fas fa-list"></i>
-                            <span>Chọn chủ đề</span>
+                            <span>SAP B1</span>
                             <i class="fas fa-chevron-down text-sm"></i>
                         </button>
                         <div
@@ -234,19 +228,19 @@
                             </button>
                             <button
                                 class="w-full text-left px-4 py-2 hover:bg-dark-border text-dark-text transition-colors"
-                                onclick="selectTopic('Sap_b1')"
+                                onclick="selectTopic('SAP_B1')"
                             >
                                 SAP B1
                             </button>
                             <button
                                 class="w-full text-left px-4 py-2 hover:bg-dark-border text-dark-text transition-colors"
-                                onclick="selectTopic('Sap_hana')"
+                                onclick="selectTopic('SAP_HANA')"
                             >
                                 SAP HANA
                             </button>
                             <button
                                 class="w-full text-left px-4 py-2 hover:bg-dark-border text-dark-text transition-colors"
-                                onclick="selectTopic('Support')"
+                                onclick="selectTopic('HBC_AI_ASSISTANT')"
                             >
                                 Hỗ trợ
                             </button>

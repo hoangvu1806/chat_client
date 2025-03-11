@@ -34,6 +34,7 @@ const themeToggle = document.getElementById("themeToggle");
 const body = document.body;
 const topicDropdownBtn = document.getElementById("topicDropdownBtn");
 const topicDropdown = document.getElementById("topicDropdown");
+const topic = topicDropdownBtn.textContent.trim();
 
 // Hàm escape HTML để bảo vệ nội dung
 function escapeHtml(unsafe) {
@@ -206,11 +207,15 @@ function renderMessages() {
     messagesArea.scrollTop = messagesArea.scrollHeight;
 }
 
-// Topic Dropdown
+// Biến toàn cục lưu chủ đề đã chọn
+let selectedTopic = "General"; // Mặc định là "General"
+
+// Hiển thị hoặc ẩn dropdown chủ đề
 function toggleTopicDropdown() {
     topicDropdown.classList.toggle("hidden");
 }
 
+// Đóng dropdown khi click ra ngoài
 document.addEventListener("click", (e) => {
     if (
         !topicDropdownBtn.contains(e.target) &&
@@ -221,24 +226,28 @@ document.addEventListener("click", (e) => {
 });
 
 function selectTopic(topic) {
-    const activeSession = getActiveSession();
-    sessions = sessions.map((session) =>
-        session.id === activeSession.id
-            ? { ...session, title: `${topic} Chat` }
-            : session
-    );
+    // Cập nhật chủ đề đã chọn vào biến toàn cục
+    let selectedTopic = topic;
+
+    // Giữ nguyên icon và chỉ thay đổi nội dung văn bản
+    topicDropdownBtn.innerHTML = `<i class="fas fa-comments"></i> ${topic.replace(
+        "_",
+        " "
+    )}`;
 
     const welcomeMessages = {
         General: "Xin chào! Tôi có thể giúp gì cho bạn hôm nay?",
-        Sap_b1: "Chào bạn! Bạn muốn thảo luận gì về công nghệ?",
-        Sap_hana: "Xin chào! Bạn quan tâm đến chủ đề khoa học nào?",
-        Support: "Chào bạn! Tôi ở đây để hỗ trợ bạn, bạn cần giúp gì?",
+        SAP_B1: "Chào bạn! Bạn muốn tôi giúp gì về SAP B1?",
+        SAP_HANA: "Xin chào! Bạn cần trợ giúp gì về SAP HANA không?",
+        HBC_AI_ASSISTANT: "Chào bạn! Tôi ở đây để hỗ trợ bạn, bạn cần giúp gì?",
     };
 
-    addMessage(welcomeMessages[topic], false);
+    addMessage(
+        welcomeMessages[topic] || "Xin chào! Hãy bắt đầu cuộc trò chuyện.",
+        false
+    );
     topicDropdown.classList.add("hidden");
-    updateChatHistory();
-    renderMessages();
+    console.log("Chủ đề đã chọn:", selectedTopic);
 }
 
 // Handle Send Message
@@ -363,11 +372,6 @@ topicDropdownBtn.addEventListener("click", (e) => {
     toggleTopicDropdown();
 });
 
-// Initial render
-updateTheme();
-updateChatHistory();
-renderMessages();
-
 const editTitleBtn = document.getElementById("editTitleBtn");
 const editTitleModal = document.getElementById("editTitleModal");
 const newTitleInput = document.getElementById("newTitleInput");
@@ -413,3 +417,8 @@ editTitleModal.addEventListener("click", (e) => {
         hideEditTitleModal();
     }
 });
+
+// Initial render
+updateTheme();
+updateChatHistory();
+renderMessages();
